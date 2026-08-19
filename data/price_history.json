@@ -1,3 +1,36 @@
 {
-  "runs": []
+  "runs": [
+    {
+      "timestamp": "2026-08-19T17:23:25.077549+00:00",
+      "origin": "LAX",
+      "destination": "ICN",
+      "results": [
+        {
+          "depart": "2027-04-20",
+          "return": "2027-04-30",
+          "price": 833
+        },
+        {
+          "depart": "2027-04-25",
+          "return": "2027-05-05",
+          "price": 883
+        },
+        {
+          "depart": "2027-04-29",
+          "return": "2027-05-09",
+          "price": 958
+        },
+        {
+          "depart": "2027-04-01",
+          "return": "2027-04-11",
+          "price": 1123
+        }
+      ],
+      "cheapest": {
+        "depart": "2027-04-20",
+        "return": "2027-04-30",
+        "price": 833
+      }
+    }
+  ]
 }
