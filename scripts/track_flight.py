@@ -11,7 +11,8 @@ Required environment variables:
 Optional:
     ORIGIN              IATA code, default "LAX"
     DESTINATION         IATA code, default "ICN"
-    TRIP_LENGTH_DAYS    Length of stay per candidate search, default 15
+    TRIP_LENGTH_DAYS    Length of stay per candidate search, default 13
+                         (Monday departure -> Sunday return, ~2 weeks)
 """
 import json
 import os
@@ -29,17 +30,12 @@ HISTORY_PATH = Path(__file__).resolve().parent.parent / "data" / "price_history.
 
 ORIGIN = os.environ.get("ORIGIN", "LAX")
 DESTINATION = os.environ.get("DESTINATION", "ICN")
-TRIP_LENGTH_DAYS = int(os.environ.get("TRIP_LENGTH_DAYS", "15"))
+TRIP_LENGTH_DAYS = int(os.environ.get("TRIP_LENGTH_DAYS", "13"))
 
-# Candidate departure dates spread across April 2027.
-APRIL_DEPARTURE_DAYS = [1, 5, 10, 15, 20, 25, 29]
+# The Mondays in April 2027 — departing Monday with a 13 day trip returns on
+# a Sunday, matching a "leave Monday, come back on a weekend" ~2 week trip.
+APRIL_DEPARTURE_DAYS = [5, 12, 19, 26]
 YEAR = 2027
-
-# SerpApi's free tier is capped at 250 searches/month. Checking every date
-# every run would blow through that fast, so each run only checks a rotating
-# slice of dates (picked by time of day) — over a day, all dates still get
-# covered, but at a fraction of the search volume.
-DATES_PER_RUN = 4
 
 
 def candidate_date_pairs():
@@ -49,12 +45,6 @@ def candidate_date_pairs():
         ret = depart + timedelta(days=TRIP_LENGTH_DAYS)
         pairs.append((depart.isoformat(), ret.isoformat()))
     return pairs
-
-
-def dates_for_this_run(pairs):
-    hour_bucket = datetime.now(timezone.utc).hour // 12  # 0-1, matches the every-12h schedule
-    start = (hour_bucket * DATES_PER_RUN) % len(pairs)
-    return [pairs[(start + i) % len(pairs)] for i in range(DATES_PER_RUN)]
 
 
 def fetch_price(api_key, depart_date, return_date):
@@ -122,7 +112,7 @@ def main():
         sys.exit(1)
 
     results = []
-    for depart_date, return_date in dates_for_this_run(candidate_date_pairs()):
+    for depart_date, return_date in candidate_date_pairs():
         try:
             price = fetch_price(api_key, depart_date, return_date)
         except requests.RequestException as exc:

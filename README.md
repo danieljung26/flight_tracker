@@ -6,19 +6,18 @@ you the cheapest fare found, several times a day.
 ## How it works
 
 - `scripts/track_flight.py` queries [SerpApi's Google Flights engine](https://serpapi.com/google-flights-api)
-  for a rotating slice of candidate departure dates across April 2027 (each
-  paired with a ~15 day return, for a ~2 week trip), finds the cheapest fare among them, and
-  appends the results to `data/price_history.json`.
+  for each of the 4 Mondays in April 2027 (each paired with a 13 day return,
+  landing on a Sunday — a "leave Monday, back on a weekend" ~2 week trip),
+  finds the cheapest fare among them, and appends the results to
+  `data/price_history.json`.
 - It then emails a summary: cheapest fare this check, cheapest fare found
   today, and the cheapest fare ever recorded — flagging a new all-time low
   when one is found.
 - `.github/workflows/flight_price_tracker.yml` runs this on a schedule
   (twice a day, 12 hours apart) via GitHub Actions, and commits the updated
   history file back to the repo.
-- To stay within SerpApi's free tier (250 searches/month), each run only
-  checks `DATES_PER_RUN` (4) of the 7 candidate dates, rotating by time of
-  day — so all 7 dates still get checked daily, at 2 runs/day × 4 dates =
-  8 searches/day (~240/month).
+- That's 4 dates × 2 runs/day = 8 searches/day (~240/month), comfortably
+  within SerpApi's free tier (250 searches/month).
 
 ## Setup
 
@@ -36,7 +35,7 @@ Optional environment overrides (edit the workflow or script defaults):
 
 - `ORIGIN` (default `LAX`)
 - `DESTINATION` (default `ICN`)
-- `TRIP_LENGTH_DAYS` (default `15`, kept in the 14-16 day range for a ~2 week trip)
+- `TRIP_LENGTH_DAYS` (default `13`; Monday departure + 13 days lands on a Sunday)
 
 ## Running manually
 
