@@ -11,8 +11,14 @@ Required environment variables:
 Optional:
     ORIGIN              IATA code, default "LAX"
     DESTINATION         IATA code, default "ICN"
-    TRIP_LENGTH_DAYS    Length of stay per candidate search, default 15
-                         (Friday departure -> Saturday return, ~2 weeks)
+    MIN_TRIP_DAYS       Shortest trip length to consider, default 14
+    MAX_TRIP_DAYS       Longest trip length to consider, default 16
+
+Every April departure date is paired with every trip length in
+[MIN_TRIP_DAYS, MAX_TRIP_DAYS] whose return date lands on a Saturday or
+Sunday, and each run checks a rotating slice of that full candidate list —
+so over time the "cheapest ever recorded" figure converges on the actual
+cheapest weekend-returning ~2 week trip, not just one fixed weekday.
 """
 import json
 import os
@@ -30,21 +36,30 @@ HISTORY_PATH = Path(__file__).resolve().parent.parent / "data" / "price_history.
 
 ORIGIN = os.environ.get("ORIGIN", "LAX")
 DESTINATION = os.environ.get("DESTINATION", "ICN")
-TRIP_LENGTH_DAYS = int(os.environ.get("TRIP_LENGTH_DAYS", "15"))
-
-# The Fridays in April 2027 — departing Friday with a 15 day trip returns on
-# a Saturday, matching a ~2 week trip that comes back on a weekend.
-APRIL_DEPARTURE_DAYS = [2, 9, 16, 23]
+MIN_TRIP_DAYS = int(os.environ.get("MIN_TRIP_DAYS", "14"))
+MAX_TRIP_DAYS = int(os.environ.get("MAX_TRIP_DAYS", "16"))
 YEAR = 2027
+
+# SerpApi's free tier is capped at 250 searches/month. Checking every
+# candidate every run would blow through that fast, so each run only checks
+# a rotating slice — over enough runs, every candidate still gets checked.
+DATES_PER_RUN = 4
 
 
 def candidate_date_pairs():
     pairs = []
-    for day in APRIL_DEPARTURE_DAYS:
+    for day in range(1, 31):
         depart = date(YEAR, 4, day)
-        ret = depart + timedelta(days=TRIP_LENGTH_DAYS)
-        pairs.append((depart.isoformat(), ret.isoformat()))
+        for length in range(MIN_TRIP_DAYS, MAX_TRIP_DAYS + 1):
+            ret = depart + timedelta(days=length)
+            if ret.weekday() in (5, 6):  # Saturday or Sunday
+                pairs.append((depart.isoformat(), ret.isoformat()))
     return pairs
+
+
+def dates_for_this_run(pairs, runs_so_far):
+    offset = (runs_so_far * DATES_PER_RUN) % len(pairs)
+    return [pairs[(offset + i) % len(pairs)] for i in range(DATES_PER_RUN)]
 
 
 def fetch_price(api_key, depart_date, return_date):
@@ -111,8 +126,12 @@ def main():
         print("SERPAPI_KEY is not set", file=sys.stderr)
         sys.exit(1)
 
+    history = load_history()
+    all_pairs = candidate_date_pairs()
+    this_run_pairs = dates_for_this_run(all_pairs, len(history["runs"]))
+
     results = []
-    for depart_date, return_date in candidate_date_pairs():
+    for depart_date, return_date in this_run_pairs:
         try:
             price = fetch_price(api_key, depart_date, return_date)
         except requests.RequestException as exc:
@@ -130,7 +149,6 @@ def main():
 
     cheapest_this_run = min(valid_results, key=lambda r: r["price"])
 
-    history = load_history()
     run_timestamp = datetime.now(timezone.utc).isoformat()
     history["runs"].append(
         {

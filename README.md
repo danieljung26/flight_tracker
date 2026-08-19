@@ -5,14 +5,19 @@ you the cheapest fare found, several times a day.
 
 ## How it works
 
-- `scripts/track_flight.py` queries [SerpApi's Google Flights engine](https://serpapi.com/google-flights-api)
-  for each of the 4 Fridays in April 2027 (each paired with a 15 day return,
-  landing on a Saturday — a ~2 week trip that comes back on a weekend),
-  finds the cheapest fare among them, and appends the results to
-  `data/price_history.json`.
-- It then emails a summary: cheapest fare this check, cheapest fare found
-  today, and the cheapest fare ever recorded — flagging a new all-time low
-  when one is found.
+- `scripts/track_flight.py` builds every (departure date, return date) pair
+  in April 2027 where the trip is 14-16 days long and the return lands on a
+  Saturday or Sunday (27 combinations for April 2027) — no fixed departure
+  weekday, so it covers the whole "leave whenever, ~2 weeks, back on a
+  weekend" space and finds whichever combination is actually cheapest.
+- Each run only checks a rotating slice of 4 of those combinations (to stay
+  within API budget — see below), appends results to
+  `data/price_history.json`, and emails a summary: cheapest fare this
+  check, cheapest fare found today, and the cheapest fare ever recorded —
+  flagging a new all-time low when one is found. Because the "ever
+  recorded" figure is tracked across every combination as the rotation
+  cycles through, it converges on the true cheapest option over time
+  (roughly once every ~7 runs, or ~3.5 days at the default schedule).
 - `.github/workflows/flight_price_tracker.yml` runs this on a schedule
   (twice a day, 12 hours apart) via GitHub Actions, and commits the updated
   history file back to the repo.
@@ -35,7 +40,7 @@ Optional environment overrides (edit the workflow or script defaults):
 
 - `ORIGIN` (default `LAX`)
 - `DESTINATION` (default `ICN`)
-- `TRIP_LENGTH_DAYS` (default `15`; Friday departure + 15 days lands on a Saturday)
+- `MIN_TRIP_DAYS` / `MAX_TRIP_DAYS` (default `14` / `16`)
 
 ## Running manually
 
