@@ -13,12 +13,12 @@ you the cheapest fare found, several times a day.
   today, and the cheapest fare ever recorded — flagging a new all-time low
   when one is found.
 - `.github/workflows/flight_price_tracker.yml` runs this on a schedule
-  (every 6 hours) via GitHub Actions, and commits the updated history file
-  back to the repo.
+  (twice a day, 12 hours apart) via GitHub Actions, and commits the updated
+  history file back to the repo.
 - To stay within SerpApi's free tier (250 searches/month), each run only
-  checks `DATES_PER_RUN` (2) of the 7 candidate dates, rotating by time of
-  day — so all 7 dates still get checked once daily, at 4 runs/day × 2
-  dates = 8 searches/day (~240/month).
+  checks `DATES_PER_RUN` (4) of the 7 candidate dates, rotating by time of
+  day — so all 7 dates still get checked daily, at 2 runs/day × 4 dates =
+  8 searches/day (~240/month).
 
 ## Setup
 

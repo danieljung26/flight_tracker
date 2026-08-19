@@ -2,10 +2,10 @@ name: Flight Price Tracker
 
 on:
   schedule:
-    # Every 6 hours, throughout the day (UTC). Matches DATES_PER_RUN rotation
-    # in track_flight.py so the full month of dates is covered daily while
+    # Twice a day, 12 hours apart (UTC). Matches DATES_PER_RUN rotation in
+    # track_flight.py so the full month of dates is covered daily while
     # staying within SerpApi's 250 searches/month free tier.
-    - cron: "0 */6 * * *"
+    - cron: "0 0,12 * * *"
   workflow_dispatch: {}
 
 permissions:

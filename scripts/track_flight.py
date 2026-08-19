@@ -18,7 +18,7 @@ import os
 import smtplib
 import sys
 import time
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from email.mime.text import MIMEText
 from pathlib import Path
 
@@ -39,7 +39,7 @@ YEAR = 2027
 # every run would blow through that fast, so each run only checks a rotating
 # slice of dates (picked by time of day) — over a day, all dates still get
 # covered, but at a fraction of the search volume.
-DATES_PER_RUN = 2
+DATES_PER_RUN = 4
 
 
 def candidate_date_pairs():
@@ -52,7 +52,7 @@ def candidate_date_pairs():
 
 
 def dates_for_this_run(pairs):
-    hour_bucket = datetime.utcnow().hour // 6  # 0-3, matches the every-6h schedule
+    hour_bucket = datetime.now(timezone.utc).hour // 12  # 0-1, matches the every-12h schedule
     start = (hour_bucket * DATES_PER_RUN) % len(pairs)
     return [pairs[(start + i) % len(pairs)] for i in range(DATES_PER_RUN)]
 
@@ -103,7 +103,7 @@ def save_history(history):
 def send_email(subject, body):
     email_address = os.environ["EMAIL_ADDRESS"]
     email_password = os.environ["EMAIL_APP_PASSWORD"]
-    email_to = os.environ.get("EMAIL_TO", email_address)
+    email_to = os.environ.get("EMAIL_TO") or email_address
 
     msg = MIMEText(body)
     msg["Subject"] = subject
@@ -141,7 +141,7 @@ def main():
     cheapest_this_run = min(valid_results, key=lambda r: r["price"])
 
     history = load_history()
-    run_timestamp = datetime.utcnow().isoformat() + "Z"
+    run_timestamp = datetime.now(timezone.utc).isoformat()
     history["runs"].append(
         {
             "timestamp": run_timestamp,
