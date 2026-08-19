@@ -11,7 +11,7 @@ Required environment variables:
 Optional:
     ORIGIN              IATA code, default "LAX"
     DESTINATION         IATA code, default "ICN"
-    TRIP_LENGTH_DAYS    Length of stay per candidate search, default 10
+    TRIP_LENGTH_DAYS    Length of stay per candidate search, default 15
 """
 import json
 import os
@@ -29,7 +29,7 @@ HISTORY_PATH = Path(__file__).resolve().parent.parent / "data" / "price_history.
 
 ORIGIN = os.environ.get("ORIGIN", "LAX")
 DESTINATION = os.environ.get("DESTINATION", "ICN")
-TRIP_LENGTH_DAYS = int(os.environ.get("TRIP_LENGTH_DAYS", "10"))
+TRIP_LENGTH_DAYS = int(os.environ.get("TRIP_LENGTH_DAYS", "15"))
 
 # Candidate departure dates spread across April 2027.
 APRIL_DEPARTURE_DAYS = [1, 5, 10, 15, 20, 25, 29]
