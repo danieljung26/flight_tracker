@@ -6,15 +6,19 @@ you the cheapest fare found, several times a day.
 ## How it works
 
 - `scripts/track_flight.py` queries [SerpApi's Google Flights engine](https://serpapi.com/google-flights-api)
-  for a spread of candidate departure dates across April 2027 (each paired
-  with a ~10 day return), finds the cheapest fare among them, and appends
-  the results to `data/price_history.json`.
+  for a rotating slice of candidate departure dates across April 2027 (each
+  paired with a ~10 day return), finds the cheapest fare among them, and
+  appends the results to `data/price_history.json`.
 - It then emails a summary: cheapest fare this check, cheapest fare found
   today, and the cheapest fare ever recorded — flagging a new all-time low
   when one is found.
 - `.github/workflows/flight_price_tracker.yml` runs this on a schedule
-  (every 4 hours) via GitHub Actions, and commits the updated history file
+  (every 6 hours) via GitHub Actions, and commits the updated history file
   back to the repo.
+- To stay within SerpApi's free tier (250 searches/month), each run only
+  checks `DATES_PER_RUN` (2) of the 7 candidate dates, rotating by time of
+  day — so all 7 dates still get checked once daily, at 4 runs/day × 2
+  dates = 8 searches/day (~240/month).
 
 ## Setup
 
@@ -23,7 +27,7 @@ Actions**:
 
 | Secret | Description |
 | --- | --- |
-| `SERPAPI_KEY` | API key from [serpapi.com](https://serpapi.com) (free tier works for a few checks/month; a paid plan is needed for checking every 4 hours long-term) |
+| `SERPAPI_KEY` | API key from [serpapi.com](https://serpapi.com) (free tier: 250 searches/month, which the default schedule/rotation is tuned to fit) |
 | `EMAIL_ADDRESS` | Gmail address to send the report from |
 | `EMAIL_APP_PASSWORD` | A [Gmail App Password](https://myaccount.google.com/apppasswords) for that address (not your normal password) |
 | `EMAIL_TO` | (optional) Address to send reports to — defaults to `EMAIL_ADDRESS` |
