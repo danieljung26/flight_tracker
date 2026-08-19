@@ -11,8 +11,8 @@ Required environment variables:
 Optional:
     ORIGIN              IATA code, default "LAX"
     DESTINATION         IATA code, default "ICN"
-    TRIP_LENGTH_DAYS    Length of stay per candidate search, default 13
-                         (Monday departure -> Sunday return, ~2 weeks)
+    TRIP_LENGTH_DAYS    Length of stay per candidate search, default 15
+                         (Friday departure -> Saturday return, ~2 weeks)
 """
 import json
 import os
@@ -30,11 +30,11 @@ HISTORY_PATH = Path(__file__).resolve().parent.parent / "data" / "price_history.
 
 ORIGIN = os.environ.get("ORIGIN", "LAX")
 DESTINATION = os.environ.get("DESTINATION", "ICN")
-TRIP_LENGTH_DAYS = int(os.environ.get("TRIP_LENGTH_DAYS", "13"))
+TRIP_LENGTH_DAYS = int(os.environ.get("TRIP_LENGTH_DAYS", "15"))
 
-# The Mondays in April 2027 — departing Monday with a 13 day trip returns on
-# a Sunday, matching a "leave Monday, come back on a weekend" ~2 week trip.
-APRIL_DEPARTURE_DAYS = [5, 12, 19, 26]
+# The Fridays in April 2027 — departing Friday with a 15 day trip returns on
+# a Saturday, matching a ~2 week trip that comes back on a weekend.
+APRIL_DEPARTURE_DAYS = [2, 9, 16, 23]
 YEAR = 2027
 
 

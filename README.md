@@ -6,8 +6,8 @@ you the cheapest fare found, several times a day.
 ## How it works
 
 - `scripts/track_flight.py` queries [SerpApi's Google Flights engine](https://serpapi.com/google-flights-api)
-  for each of the 4 Mondays in April 2027 (each paired with a 13 day return,
-  landing on a Sunday — a "leave Monday, back on a weekend" ~2 week trip),
+  for each of the 4 Fridays in April 2027 (each paired with a 15 day return,
+  landing on a Saturday — a ~2 week trip that comes back on a weekend),
   finds the cheapest fare among them, and appends the results to
   `data/price_history.json`.
 - It then emails a summary: cheapest fare this check, cheapest fare found
@@ -35,7 +35,7 @@ Optional environment overrides (edit the workflow or script defaults):
 
 - `ORIGIN` (default `LAX`)
 - `DESTINATION` (default `ICN`)
-- `TRIP_LENGTH_DAYS` (default `13`; Monday departure + 13 days lands on a Sunday)
+- `TRIP_LENGTH_DAYS` (default `15`; Friday departure + 15 days lands on a Saturday)
 
 ## Running manually
 
