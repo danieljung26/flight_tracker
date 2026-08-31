@@ -26,7 +26,10 @@ you the cheapest fare found, several times a day.
 - Only itineraries Google Flights lists as including a free checked bag are
   considered — this is a best-effort match on the airline-supplied
   `extensions` text (e.g. "1st checked bag included"), not a guarantee, so
-  always double-check baggage allowance at checkout before booking.
+  always double-check baggage allowance at checkout before booking. If a
+  run's 4 checked dates happen to have no free-bag fare at all, that run
+  still completes and commits (it just says so in the email) rather than
+  failing the whole workflow.
 
 ## Setup
 

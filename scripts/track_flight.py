@@ -161,11 +161,9 @@ def main():
         time.sleep(1)  # be gentle on the API rate limit
 
     valid_results = [r for r in results if r["price"] is not None]
-    if not valid_results:
-        print("No free-checked-bag fares found this run.", file=sys.stderr)
-        sys.exit(1)
-
-    cheapest_this_run = min(valid_results, key=lambda r: r["price"])
+    cheapest_this_run = (
+        min(valid_results, key=lambda r: r["price"]) if valid_results else None
+    )
 
     run_timestamp = datetime.now(timezone.utc).isoformat()
     history["runs"].append(
@@ -180,40 +178,53 @@ def main():
     save_history(history)
 
     # All-time cheapest across every run ever recorded.
-    all_time_cheapest = min(
-        (run["cheapest"] for run in history["runs"] if run.get("cheapest")),
-        key=lambda c: c["price"],
-    )
+    past_cheapest = [run["cheapest"] for run in history["runs"] if run.get("cheapest")]
+    all_time_cheapest = min(past_cheapest, key=lambda c: c["price"]) if past_cheapest else None
 
     # Cheapest seen so far today (UTC).
     today = date.today().isoformat()
-    todays_cheapest = min(
-        (
-            run["cheapest"]
-            for run in history["runs"]
-            if run.get("cheapest") and run["timestamp"].startswith(today)
-        ),
-        key=lambda c: c["price"],
-    )
+    todays_prices = [
+        run["cheapest"]
+        for run in history["runs"]
+        if run.get("cheapest") and run["timestamp"].startswith(today)
+    ]
+    todays_cheapest = min(todays_prices, key=lambda c: c["price"]) if todays_prices else None
 
-    is_new_record = all_time_cheapest["price"] == cheapest_this_run["price"]
+    is_new_record = bool(
+        cheapest_this_run
+        and all_time_cheapest
+        and all_time_cheapest["price"] == cheapest_this_run["price"]
+    )
 
     lines = [
         f"{ORIGIN} -> {DESTINATION} round-trip, April {YEAR}",
-        "(fares below include a free checked bag per Google Flights' listing"
+        "(fares include a free checked bag per Google Flights' listing"
         " -- always confirm baggage allowance at checkout before booking)",
         "",
-        f"Cheapest fare found THIS check: ${cheapest_this_run['price']:.0f}"
-        f" (depart {cheapest_this_run['depart']}, return {cheapest_this_run['return']})",
-        f"Cheapest fare found TODAY so far: ${todays_cheapest['price']:.0f}"
-        f" (depart {todays_cheapest['depart']}, return {todays_cheapest['return']})",
-        f"Cheapest fare ever recorded: ${all_time_cheapest['price']:.0f}"
-        f" (depart {all_time_cheapest['depart']}, return {all_time_cheapest['return']})",
-        "",
-        "All dates checked this run:",
     ]
+    if cheapest_this_run:
+        lines.append(
+            f"Cheapest fare found THIS check: ${cheapest_this_run['price']:.0f}"
+            f" (depart {cheapest_this_run['depart']}, return {cheapest_this_run['return']})"
+        )
+    else:
+        lines.append(
+            "No free-checked-bag fare found among this run's checked dates."
+        )
+    if todays_cheapest:
+        lines.append(
+            f"Cheapest fare found TODAY so far: ${todays_cheapest['price']:.0f}"
+            f" (depart {todays_cheapest['depart']}, return {todays_cheapest['return']})"
+        )
+    if all_time_cheapest:
+        lines.append(
+            f"Cheapest fare ever recorded: ${all_time_cheapest['price']:.0f}"
+            f" (depart {all_time_cheapest['depart']}, return {all_time_cheapest['return']})"
+        )
+    lines.append("")
+    lines.append("All dates checked this run:")
     for r in sorted(results, key=lambda r: (r["price"] is None, r["price"])):
-        price_str = f"${r['price']:.0f}" if r["price"] is not None else "N/A"
+        price_str = f"${r['price']:.0f}" if r["price"] is not None else "N/A (no free-bag fare found)"
         lines.append(f"  depart {r['depart']} / return {r['return']}: {price_str}")
 
     if is_new_record:
@@ -222,10 +233,13 @@ def main():
 
     body = "\n".join(lines)
     subject_prefix = "[NEW LOW] " if is_new_record else ""
-    subject = (
-        f"{subject_prefix}{ORIGIN}->{DESTINATION} April {YEAR}: "
-        f"${cheapest_this_run['price']:.0f} cheapest right now"
-    )
+    if cheapest_this_run:
+        subject = (
+            f"{subject_prefix}{ORIGIN}->{DESTINATION} April {YEAR}: "
+            f"${cheapest_this_run['price']:.0f} cheapest right now"
+        )
+    else:
+        subject = f"{ORIGIN}->{DESTINATION} April {YEAR}: no free-bag fare this check"
 
     if os.environ.get("EMAIL_ADDRESS") and os.environ.get("EMAIL_APP_PASSWORD"):
         send_email(subject, body)
