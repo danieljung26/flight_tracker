@@ -767,6 +767,34 @@
         "return": "2027-05-01",
         "price": 883
       }
+    },
+    {
+      "timestamp": "2026-08-31T19:14:12.906023+00:00",
+      "origin": "LAX",
+      "destination": "ICN",
+      "results": [
+        {
+          "depart": "2027-04-17",
+          "return": "2027-05-01",
+          "price": null
+        },
+        {
+          "depart": "2027-04-17",
+          "return": "2027-05-02",
+          "price": null
+        },
+        {
+          "depart": "2027-04-18",
+          "return": "2027-05-02",
+          "price": null
+        },
+        {
+          "depart": "2027-04-22",
+          "return": "2027-05-08",
+          "price": null
+        }
+      ],
+      "cheapest": null
     }
   ]
 }
