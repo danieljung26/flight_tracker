@@ -19,11 +19,6 @@ Every April departure date is paired with every trip length in
 Sunday, and each run checks a rotating slice of that full candidate list —
 so over time the "cheapest ever recorded" figure converges on the actual
 cheapest weekend-returning ~2 week trip, not just one fixed weekday.
-
-Only itineraries Google Flights lists as including a free checked bag are
-considered (see has_free_checked_bag) — this is a best-effort text match
-on airline-supplied wording, not a guarantee, so confirm baggage allowance
-at checkout before booking.
 """
 import json
 import os
@@ -67,21 +62,7 @@ def dates_for_this_run(pairs, runs_so_far):
     return [pairs[(offset + i) % len(pairs)] for i in range(DATES_PER_RUN)]
 
 
-def has_free_checked_bag(extensions):
-    """Best-effort check of Google Flights' per-itinerary `extensions` text
-    (e.g. "1st checked bag included" vs "1st checked bag: $35"). Airline
-    wording varies, so this is a heuristic, not a guarantee — always
-    confirm baggage allowance at checkout before booking."""
-    for line in extensions or []:
-        lower = line.lower()
-        if "checked bag" in lower and "$" not in lower and "fee" not in lower:
-            return True
-    return False
-
-
 def fetch_price(api_key, depart_date, return_date):
-    """Returns the cheapest itinerary price that includes a free checked
-    bag, or None if this search had no such itinerary."""
     params = {
         "engine": "google_flights",
         "departure_id": ORIGIN,
@@ -97,19 +78,20 @@ def fetch_price(api_key, depart_date, return_date):
     resp.raise_for_status()
     payload = resp.json()
 
-    # Note: price_insights.lowest_price is excluded here — it's an
-    # aggregate across all fares and isn't tied to a specific itinerary,
-    # so we can't tell whether it includes a checked bag.
-    baggage_included_prices = []
+    prices = []
     for key in ("best_flights", "other_flights"):
         for flight in payload.get(key, []):
-            price = flight.get("price")
-            if isinstance(price, (int, float)) and has_free_checked_bag(flight.get("extensions")):
-                baggage_included_prices.append(price)
+            if isinstance(flight.get("price"), (int, float)):
+                prices.append(flight["price"])
 
-    if not baggage_included_prices:
+    insights = payload.get("price_insights") or {}
+    lowest_from_insights = insights.get("lowest_price")
+    if isinstance(lowest_from_insights, (int, float)):
+        prices.append(lowest_from_insights)
+
+    if not prices:
         return None
-    return min(baggage_included_prices)
+    return min(prices)
 
 
 def load_history():
@@ -198,8 +180,6 @@ def main():
 
     lines = [
         f"{ORIGIN} -> {DESTINATION} round-trip, April {YEAR}",
-        "(fares include a free checked bag per Google Flights' listing"
-        " -- always confirm baggage allowance at checkout before booking)",
         "",
     ]
     if cheapest_this_run:
@@ -208,9 +188,7 @@ def main():
             f" (depart {cheapest_this_run['depart']}, return {cheapest_this_run['return']})"
         )
     else:
-        lines.append(
-            "No free-checked-bag fare found among this run's checked dates."
-        )
+        lines.append("No prices could be fetched for this run's checked dates.")
     if todays_cheapest:
         lines.append(
             f"Cheapest fare found TODAY so far: ${todays_cheapest['price']:.0f}"
@@ -224,7 +202,7 @@ def main():
     lines.append("")
     lines.append("All dates checked this run:")
     for r in sorted(results, key=lambda r: (r["price"] is None, r["price"])):
-        price_str = f"${r['price']:.0f}" if r["price"] is not None else "N/A (no free-bag fare found)"
+        price_str = f"${r['price']:.0f}" if r["price"] is not None else "N/A"
         lines.append(f"  depart {r['depart']} / return {r['return']}: {price_str}")
 
     if is_new_record:
@@ -239,7 +217,7 @@ def main():
             f"${cheapest_this_run['price']:.0f} cheapest right now"
         )
     else:
-        subject = f"{ORIGIN}->{DESTINATION} April {YEAR}: no free-bag fare this check"
+        subject = f"{ORIGIN}->{DESTINATION} April {YEAR}: no prices found this check"
 
     if os.environ.get("EMAIL_ADDRESS") and os.environ.get("EMAIL_APP_PASSWORD"):
         send_email(subject, body)

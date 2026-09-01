@@ -23,13 +23,9 @@ you the cheapest fare found, several times a day.
   history file back to the repo.
 - That's 4 dates × 2 runs/day = 8 searches/day (~240/month), comfortably
   within SerpApi's free tier (250 searches/month).
-- Only itineraries Google Flights lists as including a free checked bag are
-  considered — this is a best-effort match on the airline-supplied
-  `extensions` text (e.g. "1st checked bag included"), not a guarantee, so
-  always double-check baggage allowance at checkout before booking. If a
-  run's 4 checked dates happen to have no free-bag fare at all, that run
-  still completes and commits (it just says so in the email) rather than
-  failing the whole workflow.
+- Prices are Google Flights' listed fare price as-is — baggage inclusion
+  varies by airline/fare class and isn't filtered on, so check what's
+  included at checkout before booking.
 
 ## Setup
 
