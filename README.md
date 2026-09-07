@@ -11,13 +11,15 @@ you the cheapest fare found, several times a day.
   weekday, so it covers the whole "leave whenever, ~2 weeks, back on a
   weekend" space and finds whichever combination is actually cheapest.
 - Each run only checks a rotating slice of 4 of those combinations (to stay
-  within API budget — see below), appends results to
+  within API budget — see below), appends results (including the
+  airline(s) operating the cheapest itinerary for each date pair) to
   `data/price_history.json`, and emails a summary: cheapest fare this
   check, cheapest fare found today, and the cheapest fare ever recorded —
-  flagging a new all-time low when one is found. Because the "ever
-  recorded" figure is tracked across every combination as the rotation
-  cycles through, it converges on the true cheapest option over time
-  (roughly once every ~7 runs, or ~3.5 days at the default schedule).
+  each with its airline — flagging a new all-time low when one is found.
+  Because the "ever recorded" figure is tracked across every combination
+  as the rotation cycles through, it converges on the true cheapest option
+  over time (roughly once every ~7 runs, or ~3.5 days at the default
+  schedule).
 - `.github/workflows/flight_price_tracker.yml` runs this on a schedule
   (twice a day, 12 hours apart) via GitHub Actions, and commits the updated
   history file back to the repo.

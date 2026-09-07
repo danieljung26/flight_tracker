@@ -62,7 +62,21 @@ def dates_for_this_run(pairs, runs_so_far):
     return [pairs[(offset + i) % len(pairs)] for i in range(DATES_PER_RUN)]
 
 
+def airline_summary(itinerary):
+    """Joins the unique operating airline(s) across an itinerary's legs,
+    e.g. "Korean Air" or "Korean Air, Asiana Airlines" for a mixed-carrier
+    routing. Falls back to "Unknown" if Google Flights didn't list one."""
+    names = []
+    for leg in itinerary.get("flights", []) or []:
+        name = leg.get("airline")
+        if name and name not in names:
+            names.append(name)
+    return ", ".join(names) if names else "Unknown"
+
+
 def fetch_price(api_key, depart_date, return_date):
+    """Returns {"price": ..., "airline": ...} for the cheapest itinerary,
+    or None if no itinerary was found."""
     params = {
         "engine": "google_flights",
         "departure_id": ORIGIN,
@@ -78,20 +92,17 @@ def fetch_price(api_key, depart_date, return_date):
     resp.raise_for_status()
     payload = resp.json()
 
-    prices = []
+    itineraries = []
     for key in ("best_flights", "other_flights"):
         for flight in payload.get(key, []):
             if isinstance(flight.get("price"), (int, float)):
-                prices.append(flight["price"])
+                itineraries.append(
+                    {"price": flight["price"], "airline": airline_summary(flight)}
+                )
 
-    insights = payload.get("price_insights") or {}
-    lowest_from_insights = insights.get("lowest_price")
-    if isinstance(lowest_from_insights, (int, float)):
-        prices.append(lowest_from_insights)
-
-    if not prices:
+    if not itineraries:
         return None
-    return min(prices)
+    return min(itineraries, key=lambda i: i["price"])
 
 
 def load_history():
@@ -133,12 +144,17 @@ def main():
     results = []
     for depart_date, return_date in this_run_pairs:
         try:
-            price = fetch_price(api_key, depart_date, return_date)
+            cheapest = fetch_price(api_key, depart_date, return_date)
         except requests.RequestException as exc:
             print(f"Error fetching {depart_date}/{return_date}: {exc}", file=sys.stderr)
-            price = None
+            cheapest = None
         results.append(
-            {"depart": depart_date, "return": return_date, "price": price}
+            {
+                "depart": depart_date,
+                "return": return_date,
+                "price": cheapest["price"] if cheapest else None,
+                "airline": cheapest["airline"] if cheapest else None,
+            }
         )
         time.sleep(1)  # be gentle on the API rate limit
 
@@ -184,25 +200,28 @@ def main():
     ]
     if cheapest_this_run:
         lines.append(
-            f"Cheapest fare found THIS check: ${cheapest_this_run['price']:.0f}"
+            f"Cheapest fare found THIS check: ${cheapest_this_run['price']:.0f} on"
+            f" {cheapest_this_run.get('airline', 'Unknown')}"
             f" (depart {cheapest_this_run['depart']}, return {cheapest_this_run['return']})"
         )
     else:
         lines.append("No prices could be fetched for this run's checked dates.")
     if todays_cheapest:
         lines.append(
-            f"Cheapest fare found TODAY so far: ${todays_cheapest['price']:.0f}"
+            f"Cheapest fare found TODAY so far: ${todays_cheapest['price']:.0f} on"
+            f" {todays_cheapest.get('airline', 'Unknown')}"
             f" (depart {todays_cheapest['depart']}, return {todays_cheapest['return']})"
         )
     if all_time_cheapest:
         lines.append(
-            f"Cheapest fare ever recorded: ${all_time_cheapest['price']:.0f}"
+            f"Cheapest fare ever recorded: ${all_time_cheapest['price']:.0f} on"
+            f" {all_time_cheapest.get('airline', 'Unknown')}"
             f" (depart {all_time_cheapest['depart']}, return {all_time_cheapest['return']})"
         )
     lines.append("")
     lines.append("All dates checked this run:")
     for r in sorted(results, key=lambda r: (r["price"] is None, r["price"])):
-        price_str = f"${r['price']:.0f}" if r["price"] is not None else "N/A"
+        price_str = f"${r['price']:.0f} on {r['airline']}" if r["price"] is not None else "N/A"
         lines.append(f"  depart {r['depart']} / return {r['return']}: {price_str}")
 
     if is_new_record:
@@ -214,7 +233,7 @@ def main():
     if cheapest_this_run:
         subject = (
             f"{subject_prefix}{ORIGIN}->{DESTINATION} April {YEAR}: "
-            f"${cheapest_this_run['price']:.0f} cheapest right now"
+            f"${cheapest_this_run['price']:.0f} on {cheapest_this_run.get('airline', 'Unknown')}"
         )
     else:
         subject = f"{ORIGIN}->{DESTINATION} April {YEAR}: no prices found this check"
