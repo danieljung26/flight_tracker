@@ -1604,6 +1604,43 @@
         "price": 883,
         "airline": "Air Premia"
       }
+    },
+    {
+      "timestamp": "2026-09-12T04:09:01.639786+00:00",
+      "origin": "LAX",
+      "destination": "ICN",
+      "results": [
+        {
+          "depart": "2027-04-09",
+          "return": "2027-04-24",
+          "price": 883,
+          "airline": "Air Premia"
+        },
+        {
+          "depart": "2027-04-09",
+          "return": "2027-04-25",
+          "price": 883,
+          "airline": "Air Premia"
+        },
+        {
+          "depart": "2027-04-10",
+          "return": "2027-04-24",
+          "price": 933,
+          "airline": "Air Premia"
+        },
+        {
+          "depart": "2027-04-10",
+          "return": "2027-04-25",
+          "price": 933,
+          "airline": "Air Premia"
+        }
+      ],
+      "cheapest": {
+        "depart": "2027-04-09",
+        "return": "2027-04-24",
+        "price": 883,
+        "airline": "Air Premia"
+      }
     }
   ]
 }
