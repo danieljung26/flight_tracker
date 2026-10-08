@@ -3528,6 +3528,43 @@
         "price": 899,
         "airline": "XiamenAir"
       }
+    },
+    {
+      "timestamp": "2026-10-08T18:43:44.895871+00:00",
+      "origin": "LAX",
+      "destination": "ICN",
+      "results": [
+        {
+          "depart": "2027-04-30",
+          "return": "2027-05-16",
+          "price": 959,
+          "airline": "Air Premia"
+        },
+        {
+          "depart": "2027-04-01",
+          "return": "2027-04-17",
+          "price": 884,
+          "airline": "Air Premia"
+        },
+        {
+          "depart": "2027-04-02",
+          "return": "2027-04-17",
+          "price": 884,
+          "airline": "Air Premia"
+        },
+        {
+          "depart": "2027-04-02",
+          "return": "2027-04-18",
+          "price": 884,
+          "airline": "Air Premia"
+        }
+      ],
+      "cheapest": {
+        "depart": "2027-04-01",
+        "return": "2027-04-17",
+        "price": 884,
+        "airline": "Air Premia"
+      }
     }
   ]
 }
