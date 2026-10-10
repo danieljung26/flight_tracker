@@ -3639,6 +3639,43 @@
         "price": 884,
         "airline": "Air Premia"
       }
+    },
+    {
+      "timestamp": "2026-10-10T05:24:09.372208+00:00",
+      "origin": "LAX",
+      "destination": "ICN",
+      "results": [
+        {
+          "depart": "2027-04-11",
+          "return": "2027-04-25",
+          "price": 906,
+          "airline": "Cathay Pacific"
+        },
+        {
+          "depart": "2027-04-15",
+          "return": "2027-05-01",
+          "price": 1058,
+          "airline": "EVA Air"
+        },
+        {
+          "depart": "2027-04-16",
+          "return": "2027-05-01",
+          "price": 1096,
+          "airline": "EVA Air"
+        },
+        {
+          "depart": "2027-04-16",
+          "return": "2027-05-02",
+          "price": 1038,
+          "airline": "Philippine Airlines"
+        }
+      ],
+      "cheapest": {
+        "depart": "2027-04-11",
+        "return": "2027-04-25",
+        "price": 906,
+        "airline": "Cathay Pacific"
+      }
     }
   ]
 }
