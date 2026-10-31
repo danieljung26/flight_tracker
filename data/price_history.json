@@ -5230,6 +5230,43 @@
         "price": 934,
         "airline": "Air Premia"
       }
+    },
+    {
+      "timestamp": "2026-10-31T17:07:14.327643+00:00",
+      "origin": "LAX",
+      "destination": "ICN",
+      "results": [
+        {
+          "depart": "2027-04-24",
+          "return": "2027-05-08",
+          "price": 984,
+          "airline": "Air Premia"
+        },
+        {
+          "depart": "2027-04-24",
+          "return": "2027-05-09",
+          "price": 984,
+          "airline": "Air Premia"
+        },
+        {
+          "depart": "2027-04-25",
+          "return": "2027-05-09",
+          "price": 969,
+          "airline": "WestJet"
+        },
+        {
+          "depart": "2027-04-29",
+          "return": "2027-05-15",
+          "price": 934,
+          "airline": "Air Premia"
+        }
+      ],
+      "cheapest": {
+        "depart": "2027-04-29",
+        "return": "2027-05-15",
+        "price": 934,
+        "airline": "Air Premia"
+      }
     }
   ]
 }
