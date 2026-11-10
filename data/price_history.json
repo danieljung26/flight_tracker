@@ -5933,6 +5933,43 @@
         "price": 1034,
         "airline": "Air Premia"
       }
+    },
+    {
+      "timestamp": "2026-11-10T06:53:34.562742+00:00",
+      "origin": "LAX",
+      "destination": "ICN",
+      "results": [
+        {
+          "depart": "2027-04-17",
+          "return": "2027-05-02",
+          "price": 1084,
+          "airline": "Air Premia"
+        },
+        {
+          "depart": "2027-04-18",
+          "return": "2027-05-02",
+          "price": 1084,
+          "airline": "Air Premia"
+        },
+        {
+          "depart": "2027-04-22",
+          "return": "2027-05-08",
+          "price": 976,
+          "airline": "Cathay Pacific"
+        },
+        {
+          "depart": "2027-04-23",
+          "return": "2027-05-08",
+          "price": 1034,
+          "airline": "Air Premia"
+        }
+      ],
+      "cheapest": {
+        "depart": "2027-04-22",
+        "return": "2027-05-08",
+        "price": 976,
+        "airline": "Cathay Pacific"
+      }
     }
   ]
 }
