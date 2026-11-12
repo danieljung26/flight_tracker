@@ -6118,6 +6118,43 @@
         "price": 906,
         "airline": "Cathay Pacific"
       }
+    },
+    {
+      "timestamp": "2026-11-12T19:45:14.094862+00:00",
+      "origin": "LAX",
+      "destination": "ICN",
+      "results": [
+        {
+          "depart": "2027-04-10",
+          "return": "2027-04-24",
+          "price": 956,
+          "airline": "Cathay Pacific"
+        },
+        {
+          "depart": "2027-04-10",
+          "return": "2027-04-25",
+          "price": 906,
+          "airline": "Cathay Pacific"
+        },
+        {
+          "depart": "2027-04-11",
+          "return": "2027-04-25",
+          "price": 906,
+          "airline": "Cathay Pacific"
+        },
+        {
+          "depart": "2027-04-15",
+          "return": "2027-05-01",
+          "price": 1147,
+          "airline": "WestJet"
+        }
+      ],
+      "cheapest": {
+        "depart": "2027-04-10",
+        "return": "2027-04-25",
+        "price": 906,
+        "airline": "Cathay Pacific"
+      }
     }
   ]
 }
