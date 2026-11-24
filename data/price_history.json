@@ -7006,6 +7006,43 @@
         "price": 829,
         "airline": "Philippine Airlines"
       }
+    },
+    {
+      "timestamp": "2026-11-24T22:12:52.620605+00:00",
+      "origin": "LAX",
+      "destination": "ICN",
+      "results": [
+        {
+          "depart": "2027-04-29",
+          "return": "2027-05-15",
+          "price": 1006,
+          "airline": "Korean Air"
+        },
+        {
+          "depart": "2027-04-30",
+          "return": "2027-05-15",
+          "price": 1048,
+          "airline": "WestJet"
+        },
+        {
+          "depart": "2027-04-30",
+          "return": "2027-05-16",
+          "price": 1048,
+          "airline": "WestJet"
+        },
+        {
+          "depart": "2027-04-01",
+          "return": "2027-04-17",
+          "price": 1006,
+          "airline": "Korean Air"
+        }
+      ],
+      "cheapest": {
+        "depart": "2027-04-29",
+        "return": "2027-05-15",
+        "price": 1006,
+        "airline": "Korean Air"
+      }
     }
   ]
 }
